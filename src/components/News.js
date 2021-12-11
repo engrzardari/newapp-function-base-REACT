@@ -1,4 +1,4 @@
-import React, { Component, useEffect,useState } from 'react'
+import React, {useEffect,useState } from 'react'
 import NewsItem from './NewsItem'
 import Spinner from './Spinner';
 import PropTypes from 'prop-types'
@@ -9,11 +9,9 @@ const News = (props)=> {
     const [articles, setarticles] = useState([]);
     const [laoding, setlaoding] = useState(true);
     const [page, setpage] = useState(1);
-    const [stopNext, setstopNext] = useState(0);
+    //const [stopNext, setstopNext] = useState(0);
     const [totalResults, settotalResults] = useState(0);
-    //const [progress, setProgress] = useState(0);
-    
-    
+    //const [Progress, setProgress] = useState(0);
     
     const capitalizeLetter = (str)=>{
         return str.charAt(0).toUpperCase() + str.slice(1);
@@ -23,7 +21,7 @@ const News = (props)=> {
 
     const UpdatePage = async ()=>{
         setlaoding(true);
-        props.setProgress(0);
+        //setProgress(0);
         const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.ApiKey}&pageSize=${props.pageSize}&page=${page}` ;
         
         setlaoding(true);
@@ -33,12 +31,13 @@ const News = (props)=> {
         props.setProgress(50);
         // console.log(pareseData);
         setarticles(pareseData.articles);
+        props.getTotalResults(pareseData.totalResults);
         settotalResults(pareseData.totalResults);
         setlaoding(false);
         props.setProgress(65);
         props.setProgress(75);
         props.setProgress(100);
-        props.getTotalResults(totalResults);
+    
         
     }
 
@@ -49,12 +48,17 @@ const News = (props)=> {
 
     const fetchMoreData = async () => {
             
-            setpage({page:page+1});
-            const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.ApiKey}&pageSize=${props.pageSize}&page=${page}` ;            
+           
+            const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.ApiKey}&pageSize=${props.pageSize}&page=${page+1}` ;            
+
+            console.log(page);    
+
+            setpage(page+1);
             let data = await fetch(url);
             let pareseData = await data.json(data);
-            // console.log(pareseData);
+            console.log(pareseData.totalResults);
             setarticles(articles.concat(pareseData.articles));
+            props.getTotalResults(pareseData.totalResults);
             settotalResults(pareseData.totalResults);
             setlaoding(false);
        
@@ -64,7 +68,7 @@ const News = (props)=> {
     
         return (
             <>
-                <h3 className="my-3 text-center" style={{ marginTop: "85px" }}> Top {(capitalizeLetter(props.category)!='General') ? capitalizeLetter(props.category) :''} Headlines</h3>
+                <h3 className="my-3 text-center" style={{ marginTop: "85px !important" }}> Top {(capitalizeLetter(props.category)!='General') ? capitalizeLetter(props.category) :''} Headlines</h3>
                  {laoding && <Spinner/>} 
                 <InfiniteScroll
                 dataLength={articles.length}
@@ -87,9 +91,6 @@ const News = (props)=> {
     
 }
 
-
-
-
 News.propTypes = {
     pageSize: PropTypes.number,
     country: PropTypes.string,
@@ -103,8 +104,6 @@ News.defaultProps = {
     category: 'general',
     ApiKey:'',
 }
-
-
 
 
 export default News
